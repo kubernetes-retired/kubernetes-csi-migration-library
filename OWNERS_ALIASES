@@ -1,0 +1,16 @@
+# See the OWNERS_ALIASES docs: https://git.k8s.io/community/contributors/guide/owners.md#owners_aliases
+
+aliases:
+  steering-committee:
+    - bgrant0607
+    - brendandburns
+    - derekwaynecarr
+    - dims
+    - jbeda
+    - michelleN
+    - philips
+    - pwittrock
+    - sarahnovotny
+    - smarterclayton
+    - spiffxp
+    - timothysc
