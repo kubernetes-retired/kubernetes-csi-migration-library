@@ -27,38 +27,41 @@ var (
 	}
 )
 
-// TranslateToCSI takes a volume.Spec and will translate it to a
-// CSIPersistentVolumeSource if the translation logic for that
-// specific in-tree volume spec has been implemented
+// TranslateToCSI takes a persistent volume and will translate
+// the in-tree source to a CSI Source if the translation logic
+// has been implemented. The input persistent volume will not
+// be modified
 func TranslateInTreePVToCSI(pv *v1.PersistentVolume) (*v1.PersistentVolume, error) {
-	// TODO: probably shouldn't need to do this explicity copy if we had good mutation semantics...
-	// The semantics should be that the original PV does NOT get mutated...
 	if pv == nil {
 		return nil, fmt.Errorf("persistent volume was nil")
 	}
+	copiedPV := pv.DeepCopy()
 	for _, curPlugin := range inTreePlugins {
-		if curPlugin.CanSupport(pv) {
-			return curPlugin.TranslateInTreePVToCSI(pv)
+		if curPlugin.CanSupport(copiedPV) {
+			return curPlugin.TranslateInTreePVToCSI(copiedPV)
 		}
 	}
-	return nil, fmt.Errorf("could not find in-tree plugin translation logic for %#v", pv.Name)
+	return nil, fmt.Errorf("could not find in-tree plugin translation logic for %#v", copiedPV.Name)
 }
 
-// TranslateToIntree takes a CSIPersistentVolumeSource and will translate
-// it to a volume.Spec for the specific in-tree volume specified by
-//`inTreePlugin`, if that translation logic has been implemented
+// TranslateToIntree takes a PV with a CSI PersistentVolume Source and will translate
+// it to a in-tree Persistent Volume Source for the specific in-tree volume specified
+// by the `Driver` field in the CSI Source. The input PV object will not be modified.
 func TranslateCSIPVToInTree(pv *v1.PersistentVolume) (*v1.PersistentVolume, error) {
 	if pv == nil || pv.Spec.CSI == nil {
 		return nil, fmt.Errorf("CSI persistent volume was nil")
 	}
+	copiedPV := pv.DeepCopy()
 	for driverName, curPlugin := range inTreePlugins {
-		if pv.Spec.CSI.Driver == driverName {
-			return curPlugin.TranslateCSIPVToInTree(pv)
+		if copiedPV.Spec.CSI.Driver == driverName {
+			return curPlugin.TranslateCSIPVToInTree(copiedPV)
 		}
 	}
-	return nil, fmt.Errorf("could not find in-tree plugin translation logic for %s", pv.Spec.CSI.Driver)
+	return nil, fmt.Errorf("could not find in-tree plugin translation logic for %s", copiedPV.Spec.CSI.Driver)
 }
 
+// IsMigratedByName tests whether there is Migration logic for the in-tree plugin
+// for the given `pluginName`
 func IsMigratedByName(pluginName string) bool {
 	for _, curPlugin := range inTreePlugins {
 		if curPlugin.GetInTreePluginName() == pluginName {
@@ -68,6 +71,7 @@ func IsMigratedByName(pluginName string) bool {
 	return false
 }
 
+// IsPVMigrated tests whether there is Migration logic for the given Persistent Volume
 func IsPVMigrated(pv *v1.PersistentVolume) bool {
 	for _, curPlugin := range inTreePlugins {
 		if curPlugin.CanSupport(pv) {
@@ -77,6 +81,7 @@ func IsPVMigrated(pv *v1.PersistentVolume) bool {
 	return false
 }
 
+// IsInlineMigrated tests whether there is Migration logic for the given Inline Volume
 func IsInlineMigrated(vol *v1.Volume) bool {
 	return false
 }
