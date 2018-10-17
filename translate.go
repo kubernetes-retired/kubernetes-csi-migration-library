@@ -23,7 +23,8 @@ import (
 
 var (
 	inTreePlugins = map[string]plugins.InTreePlugin{
-		plugins.GCEPDDriverName: &plugins.GCEPD{},
+		plugins.GCEPDDriverName:  &plugins.GCEPD{},
+		plugins.AWSEBSDriverName: &plugins.AWSEBS{},
 	}
 )
 
