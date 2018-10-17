@@ -42,6 +42,21 @@ func TestTranslationStability(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "AWS EBS PV Source",
+			pv: &v1.PersistentVolume{
+				Spec: v1.PersistentVolumeSpec{
+					PersistentVolumeSource: v1.PersistentVolumeSource{
+						AWSElasticBlockStore: &v1.AWSElasticBlockStoreVolumeSource{
+							VolumeID:  "vol01",
+							FSType:    "ext3",
+							Partition: 1,
+							ReadOnly:  true,
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range testCases {
 		t.Logf("Testing %v", test.name)
