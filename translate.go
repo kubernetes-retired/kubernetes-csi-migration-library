@@ -72,6 +72,15 @@ func IsMigratedByName(pluginName string) bool {
 	return false
 }
 
+func GetCSINameFromIntreeName(pluginName string) (string, error) {
+	for csiDriverName, curPlugin := range inTreePlugins {
+		if curPlugin.GetInTreePluginName() == pluginName {
+			return csiDriverName, nil
+		}
+	}
+	return "", fmt.Errorf("Could not find CSI Driver name for plugin %v", pluginName)
+}
+
 // IsPVMigrated tests whether there is Migration logic for the given Persistent Volume
 func IsPVMigrated(pv *v1.PersistentVolume) bool {
 	for _, curPlugin := range inTreePlugins {
