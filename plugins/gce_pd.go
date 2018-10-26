@@ -56,7 +56,7 @@ func (g *GCEPD) TranslateInTreePVToCSI(pv *v1.PersistentVolume) (*v1.PersistentV
 
 	zonesLabel := pv.Labels[LabelZoneFailureDomain]
 	zones := strings.Split(zonesLabel, LabelMultiZoneDelimiter)
-	if len(zones) == 1 {
+	if len(zones) == 1 && len(zones[0]) != 0 {
 		// Zonal
 		volID = fmt.Sprintf(volIDZonalFmt, UnspecifiedValue, zones[0], pv.Spec.GCEPersistentDisk.PDName)
 	} else if len(zones) > 1 {
